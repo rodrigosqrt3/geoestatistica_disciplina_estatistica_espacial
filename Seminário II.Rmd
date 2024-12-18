@@ -1,0 +1,1594 @@
+---
+title: "Seminário II"
+subtitle: "Estatística Espacial"
+author: "Amanda, Eduardo, Lisiane e Rodrigo"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    number_sections: false
+    code_folding: show
+    df_print: paged
+    fig_width: 10
+    fig_height: 6
+    fig_caption: true
+    code_download: true
+    always_allow_html: true
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, comment = NA, message = FALSE)
+```
+
+```{css, echo = FALSE}
+/* Estilos Gerais */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.8;
+    color: #2d3748;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    background-color: #ffffff;
+}
+
+/* Cabeçalho do Documento */
+.title {
+    color: #1a365d;
+    font-size: 2.8em;
+    text-align: center;
+    margin: 1.5em 0 0.3em;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: #4a5568;
+    text-align: center;
+    font-size: 1.6em;
+    margin-bottom: 0.5em;
+    font-weight: 400;
+}
+
+.author, .date {
+    color: #718096;
+    text-align: center;
+    font-size: 1.1em;
+    margin: 0.3em 0;
+}
+
+/* Cabeçalhos */
+h1, h2, h3, h4, h5, h6 {
+    color: #2d3748;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+h1 { font-size: 2.2em; border-bottom: 2px solid #edf2f7; padding-bottom: 0.3em; }
+h2 { font-size: 1.8em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.3em; }
+
+/* Sumário (TOC) */
+#TOC {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#TOC::before {
+    content: "Sumário";
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #2d3748;
+    display: block;
+    margin-bottom: 1em;
+}
+
+.tocify {
+    border: none;
+    border-radius: 8px;
+}
+
+.tocify .tocify-item a {
+    color: #4a5568;
+    padding: 8px 15px;
+    transition: all 0.2s ease;
+}
+
+.tocify .tocify-item a:hover {
+    background-color: #edf2f7;
+    color: #2b6cb0;
+}
+
+/* Código */
+pre {
+    background-color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 1em !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9em;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+/* Tabelas */
+table {
+    width: 100%;
+    margin: 2em 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+thead {
+    background-color: #f8fafc;
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+}
+
+th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Links */
+a {
+    color: #3182ce;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #2c5282;
+    text-decoration: underline;
+}
+
+/* Figuras */
+.figure {
+    margin: 2em 0;
+    text-align: center;
+}
+
+.figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.figure-caption {
+    color: #718096;
+    font-size: 0.9em;
+    margin-top: 1em;
+    text-align: center;
+}
+
+/* Botões de download */
+.btn-default {
+    background-color: #edf2f7;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+
+.btn-default:hover {
+    background-color: #e2e8f0;
+    color: #2d3748;
+}
+```
+
+# Introdução
+
+A análise da distribuição espacial da vegetação em áreas urbanas é um tema relevante para o planejamento e a gestão das cidades, especialmente diante dos desafios impostos pelas mudanças climáticas e pela urbanização acelerada. O monitoramento da cobertura vegetal fornece informações sobre a qualidade ambiental, o microclima e o bem-estar da população, particularmente em cidades como Porto Alegre, onde a vegetação desempenha um papel significativo na mitigação de ilhas de calor e na promoção de serviços ecossistêmicos, como a regulação térmica e a melhoria da qualidade do ar.
+
+O Índice de Vegetação por Diferença Normalizada (NDVI - _Normalized Difference Vegetation Index_) é amplamente reconhecido como uma métrica para avaliar a densidade e a saúde da vegetação, utilizando dados de sensoriamento remoto. O cálculo do NDVI baseia-se na fórmula:
+
+
+$$  NDVI = \frac{\text{NIR} - \text{RED}}{\text{NIR} + \text{RED}},$$
+onde $\text{NIR}$ representa a refletância da luz no infravermelho próximo, sensível à vegetação, e $\text{RED}$ corresponde à refletância no vermelho visível, que é altamente absorvida pela clorofila. Os valores do $NDVI$ variam de $−1$ a $1$: valores próximos de $1$ indicam vegetação densa e saudável, enquanto valores próximos de $0$ sugerem pouca ou nenhuma cobertura vegetal, e valores negativos estão geralmente associados à presença de corpos d'água ou superfícies artificiais.
+
+\
+
+```{r echo=FALSE, out.width="60%", fig.align='center'}
+knitr::include_graphics("D:/Estatística Espacial/Seminário 2/647de83e216797e556dd43ba_d9c51afa.png")
+```
+
+Fonte: Streambatch - NDVI from First Principles
+
+\
+
+# Metodologia
+
+## NDVI e Dados de Sensoriamento Remoto
+
+As imagens de satélite utilizadas foram obtidas do sensor MODIS (_Moderate Resolution Imaging Spectroradiometer_), presente nos satélites Terra e Aqua, ambos operados pela NASA. O satélite Terra foi lançado em dezembro de $1999$ e desempenha um papel pioneiro na coleta de dados globais sobre a superfície terrestre. O MODIS opera em $36$ bandas espectrais, cobrindo desde o espectro visível até o infravermelho térmico, com resoluções espaciais que variam de $250$ metros a $1$ quilômetro, possibilitando análises de fenômenos ambientais em escala global.
+
+Neste trabalho, utilizamos a banda `250m_16_days_NDVI`, que fornece valores de NDVI calculados a partir de composições temporais de $16$ dias, com resolução espacial de $250$ metros. Essa composição temporal minimiza os efeitos de nuvens e outros ruídos nos dados, garantindo maior precisão e qualidade nos índices gerados.
+
+## Extração de dados com o pacote `MODISTools`
+
+A função `mt_subset`, do pacote `MODISTools`, foi utilizada para extrair dados espaciais do MODIS para a região de estudo. Essa função permite realizar consultas personalizadas, como especificar as coordenadas geográficas do centro da área de interesse, o raio de abrangência (em quilômetros) e o período de observação. Durante a execução, o pacote utiliza a API do MODIS para acessar e baixar os dados diretamente dos repositórios da NASA, otimizando o fluxo de trabalho em estudos que dependem de imagens de sensoriamento remoto.
+
+
+## Área de Estudo
+
+O presente estudo foi realizado na cidade de Porto Alegre, capital do estado do Rio Grande do Sul, Brasil. Porto Alegre possui o código IBGE $4314902$ e está localizada aproximadamente entre as coordenadas geográficas 30,03ºS de latitude e 51,23ºW de longitude. A cidade é caracterizada por um clima subtropical úmido, com influência de massas de ar tropicais e polares.
+
+## Aquisição e Processamento dos Dados
+
+A coleta dos dados de NDVI foi realizada através do sensor MODIS (produto MOD13Q1), utilizando a banda "250m_16_days_NDVI" com resolução espacial de $250$ metros. A obtenção dos dados foi executada via pacote MODISTools no R, com múltiplas iterações de coleta para garantir uma cobertura adequada da área de estudo. O processo envolveu a extração de dados em diferentes pontos centrais da região, com raios variando de $5$ a $25$ km, para assegurar uma cobertura completa e adequada da cidade.
+
+O processamento dos dados seguiu as seguintes etapas:
+
+#### 1. Criação de grade de amostragem sistemática utilizando a função criar_grid_pontos()
+
+#### 2. Download iterativo dos dados NDVI através da função download_ndvi_espacial(), com os seguintes pontos centrais:
+
+* Centro principal: -30.03°S, -51.23°W (raio de 25 km)
+ 
+* Região sul: -30.27°S, -51.15°W (raio de 5 km)
+
+* Região centro-sul: -30.15°S, -51.20°W (raio de 10 km)
+
+* Região oeste: -30.10°S, -51.30°W (raio de 15 km)
+
+* Região leste: -30.00°S, -51.10°W (raio de 10 km)
+
+* Região sudeste: -30.20°S, -51.05°W (raio de 10 km)
+
+* Região nordeste: -30.06°S, -51.00°W (raio de 15 km)
+
+* Região central complementar: -30.12°S, -51.20°W (raio de 15 km)
+
+* Região Norte 1: -29.95°S, -51.25°W (raio: 15 km)
+
+* Região Norte 2: -30.00°S, -51.15°W (raio: 15 km)
+
+#### 3. Concatenação dos dados coletados usando rbind()
+
+#### 4. Remoção de pontos duplicados através da função `duplicated()` considerando latitude e longitude
+
+#### 5. Filtragem dos dados para remoção de valores inválidos ou ausentes
+
+#### 6. Conversão dos valores digitais para NDVI real (multiplicação por 0,0001)
+
+#### 7. Exportação dos dados processados para arquivo CSV
+
+## Métodos de Análise Espacial
+
+A análise da distribuição espacial do NDVI foi realizada através de três abordagens:
+
+### Análise Geoestatística - Krigagem
+
+A krigagem ordinária foi implementada através do pacote `gstat`, seguindo as etapas:
+
+#### 1. Construção do variograma experimental para análise da dependência espacial
+
+#### 2. Ajuste do modelo teórico esférico ao variograma, permitindo a caracterização da estrutura espacial dos dados
+
+#### 3. Aplicação da krigagem ordinária para interpolação espacial, gerando uma superfície contínua de NDVI
+
+## Modelo ICAR (Intrinsic Conditional Autoregressive)
+
+O modelo ICAR foi implementado usando a abordagem Bayesiana através do INLA (Integrated Nested Laplace Approximation), com as seguintes especificações e etapas:
+
+### Pré-processamento Espacial
+
+#### 1. Construção de uma grade regular com células de 0.005 graus (~500m) sobre a área de estudo
+
+#### 2. Intersecção da grade com os limites municipais para delimitar a área de interesse
+
+#### 3. Criação de uma matriz de vizinhança ($W$) usando critério queen, garantindo conectividade entre células
+
+#### 4. Verificação e tratamento de componentes desconectados, mantendo apenas o maior componente conectado
+
+### Agregação dos Dados
+
+#### 1. Associação dos pontos NDVI às células da grade através de interseção espacial
+
+#### 2. Cálculo de estatísticas por célula:
+
+* Média do NDVI
+
+* Desvio padrão do NDVI
+
+* Número de observações
+
+### Especificação do Modelo
+
+O modelo ICAR foi especificado como:
+
+$$
+NDVI_i \sim N(\mu_i, \sigma^2)
+$$
+
+$$
+\mu_i = \beta_0 + u_i
+$$
+
+$$
+u \sim ICAR(W, \tau_u)
+$$
+
+Onde:
+
+* $NDVI_i$ é o valor médio observado na célula $i$
+
+* $\beta_0$É o intercepto do modelo. Representa o valor médio geral do NDVI na área de estudo, quando todos os outros efeitos são zero
+
+* $u_i$ é o efeito espacial aleatório seguindo uma estrutura ICAR
+
+* $u$ é um vetor que contém os efeitos espaciais aleatórios $u_i$ para todas as células da grade
+
+* $ICAR(W, \tau_u)$: Especifica que o vetor $u$ segue uma distribuição _Intrinsic Conditional Autoregressive (ICAR)_ definida pela matriz de adjacência $W$ e pelo parâmetro de precisão $\tau_u$.
+
+* $W$ é a matriz de adjacência binária
+
+* $\tau_u$ é o parâmetro de precisão espacial com prior $PC$ (_Penalized Complexity_) $(1, 0,01)$, onde o primeiro ($u = 1$) está relacionado com a "escala" ou "tamanho" do efeito espacial. Um valor maior implica que desvios maiores do efeito espacial médio são penalizados mais fortemente. O segundo parâmetro ($\alpha = 0,01$ no seu caso) está relacionado com a probabilidade de que o desvio padrão do efeito espacial seja maior que o primeiro parâmetro. Neste caso, a priori $PC(1, 0.01)$ atribui uma probabilidade de $0,01$ de que o desvio padrão do efeito espacial seja maior do que $1$.
+
+### Implementação Computacional
+
+* Utilização do INLA com estratégia gaussiana para estimação
+
+* Inclusão de critérios de ajuste (DIC e WAIC)
+
+* Computação de valores ajustados e intervalos de credibilidade
+
+* Controle de convergência e validação do modelo
+
+## Modelo SAR (Spatial Autoregressive)
+
+O modelo SAR foi implementado usando a estrutura do INLA (Integrated Nested Laplace Approximation), incorporando a dependência espacial através de uma formulação específica do modelo autorregressivo:
+
+## Pré-processamento Espacial
+
+#### 1. Construção de grade regular com células de 0.005 graus (~500m)
+
+#### 2. Tratamento topológico:
+
+* Intersecção com limites municipais
+
+* Validação geométrica
+
+* Remoção de células vazias
+
+#### 3. Construção da matriz de vizinhança:
+
+* Critério queen de adjacência
+
+* Buffer de tolerância (grid_size/50)
+
+* Verificação de conectividade completa
+
+### Agregação dos Dados
+
+#### 1. Associação espacial dos pontos NDVI às células da grade
+
+#### 2. Cálculo de estatísticas por célula:
+
+* Média do NDVI
+
+* Desvio padrão do NDVI
+
+* Número de observações
+
+#### 3. Tratamento de células sem dados
+
+### Especificação do Modelo
+
+O modelo SAR foi especificado utilizando uma formulação hierárquica no INLA:
+
+$$
+NDVI_i \sim N(\mu_i, \sigma^2)
+$$
+
+$$
+\mu_i = \beta_0 + u_i + v_i
+$$
+
+$$
+u \sim ICAR(W)
+$$
+
+$$
+v \sim N(0, Q^{-1}(\rho))
+$$
+
+$$
+Q(\rho) = (I - \rho W)
+$$
+
+Onde:
+
+* $NDVI_i$ é o valor médio observado na célula $i$
+
+* $\beta_0$É o intercepto do modelo. Representa o valor médio geral do NDVI na área de estudo, quando todos os outros efeitos são zero
+
+* $u_i$ é o efeito espacial aleatório seguindo uma estrutura ICAR, como no modelo anterior
+
+* $u$ é um vetor que contém os efeitos espaciais aleatórios $u_i$ para todas as células da grade
+
+* $v_i$ é o efeito espacial autorregressivo para a célula $i$. Este é o componente que captura a autocorrelação espacial de forma diferente do $ICAR$
+
+* $v$ é um vetor que contém os efeitos espaciais autorregressivos $v_i$ para todas as células.
+
+* $N(0, Q^{-1}(\rho)):$ O vetor $v$ segue uma distribuição Normal multivariada com média zero e matriz de covariância $Q^{-1}(\rho)$. $Q(\rho)$ é a matriz de precisão, que é o inverso da matriz de covariância.
+
+* $\rho$ é o parâmetro de autocorrelação espacial. Ele mede a força da dependência espacial entre os valores de NDVI em células vizinhas. Neste modelo, $\rho$ foi fixado em $0,5$.
+
+* $ICAR(W)$: Especifica que o vetor $u$ segue uma distribuição _Intrinsic Conditional Autoregressive (ICAR)_ definida pela matriz de adjacência $W$ e pelo parâmetro de precisão $\tau_u$.
+
+* $W$ é a matriz de adjacência binária
+
+### Implementação Computacional
+
+Utilização do INLA com dois termos aleatórios:
+
+* Componente ICAR ("besag")
+
+* Componente SAR ("generic1")
+
+Especificação da matriz de precisão como $(I - \rho W)$
+
+#### 3. Computação de critérios de ajuste:
+
+* DIC (Deviance Information Criterion)
+
+* WAIC (Watanabe-Akaike Information Criterion)
+
+#### 4. Estratégia gaussiana para estimação
+
+## Visualização
+
+A visualização dos resultados foi implementada utilizando o pacote `leaflet`, com os seguintes elementos:
+
+#### 1. Máscara dos dados para os limites municipais de Porto Alegre
+
+#### 2. Gradiente de cores representando valores de NDVI
+
+#### 3. Sobreposição do limite municipal
+
+#### 4. Elementos cartográficos (escala, minimap)
+
+# Resultados
+
+## Pacotes utilizados
+
+```{r}
+library(terra)        
+library(gstat)        
+library(sp)           
+library(ggplot2)      
+library(geobr)    
+library(MODISTools)
+library(dplyr)
+library(leaflet)
+library(INLA)
+library(spdep)
+library(sf)
+library(patchwork)
+library(plotly)
+library(scales)
+library(raster)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+library(tidyr)
+```
+
+## Função para criar grade de pontos
+
+Abaixo foi criada uma função chamada `criar_grid_pontos`, responsável por gerar uma malha regular de pontos (uma malha de coordenadas geográficas) a partir de um ponto central específico, com espaçamento definido em quilômetros. Essa grade é utilizada para definir locais onde os dados de NDVI serão coletados ou interpolados, garantindo cobertura sistemática da área de interesse.
+
+
+```{r}
+criar_grid_pontos <- function(center_lat, center_lon, km_ao_redor, espacamento_km = 2.5) {
+  # Converter km para graus (aproximadamente)
+  deg_spacing <- espacamento_km / 111  # 1 grau ≈ 111 km
+  deg_around <- km_ao_redor / 111
+  
+  lats <- seq(center_lat - deg_around, center_lat + deg_around, by = deg_spacing)
+  lons <- seq(center_lon - deg_around, center_lon + deg_around, by = deg_spacing)
+  
+  pontos <- expand.grid(latitude = lats, longitude = lons)
+  return(pontos)
+}
+```
+
+## Função para descarregar os dados
+
+O código abaixo define a função `download_ndvi_espacial`, que automatiza o processo de obtenção dos dados de NDVI a partir do produto MODIS (MOD13Q1). A função utiliza uma grade de pontos gerada em torno de uma coordenada central, definida por latitude e longitude.
+
+Em resumo, a função realiza o download dos dados NDVI (por meio da função `mt_subset()`) para uma área específica, delimitada por um ponto central e uma distância ao redor (em km). A grade de pontos necessária para a coleta é criada pela função criar_grid_pontos. Após o download, os dados coletados são concatenados (pois o processo de download ocorre em etapas) e, em seguida, são removidos valores ausentes ou duplicados. Os valores de NDVI são ajustados para valores reais (multiplicados por $0.0001$), armazenados, e os dados são exportados num arquivo CSV.
+
+```{r}
+download_ndvi_espacial <- function(center_lat, center_lon, date, km_ao_redor = 25, save_csv = TRUE) {
+  pontos_grid <- criar_grid_pontos(center_lat, center_lon, km_ao_redor)
+  resultados <- data.frame()
+  
+  for (i in 1:nrow(pontos_grid)) {
+    cat(sprintf("Baixando ponto %d de %d\n", i, nrow(pontos_grid)))
+    
+    tryCatch({
+      data <- mt_subset(
+        product = "MOD13Q1",
+        lat = pontos_grid$latitude[i],
+        lon = pontos_grid$longitude[i],
+        band = "250m_16_days_NDVI",
+        start = date,
+        end = date,
+        km_lr = 0.5,
+        km_ab = 0.5,
+        internal = TRUE
+      )
+      
+      if (nrow(data) > 0) {
+        point_data <- data.frame(
+          longitude = pontos_grid$longitude[i],
+          latitude = pontos_grid$latitude[i],
+          ndvi = data$value[1] * 0.0001  # converter para valores reais de NDVI
+        )
+        resultados <- rbind(resultados, point_data)
+      }
+    }, error = function(e) {
+      cat(sprintf("Erro no ponto %d: %s\n", i, e$message))
+    })
+  }
+  
+  # !NA
+  resultados <- resultados[!is.na(resultados$ndvi), ]
+  if(save_csv) {
+    filename <- sprintf("ndvi_data_%s.csv", gsub("-", "", date))
+    write.csv(resultados, filename, row.names = FALSE)
+    cat(sprintf("\nDados salvos em: %s\n", filename))
+  }
+  
+  return(resultados)
+}
+```
+
+### Busca dos dados
+
+Usando a função criada anteriormente, o código abaixo busca dados de NDVI para várias áreas geográficas ao redor de diferentes coordenadas, concatena esses dados, remove duplicatas e os salva em um arquivo CSV. As linhas foram colocadas como comentários com o intuito de mostrar como o banco de dados foi criado. No final importamos o arquivo `complete_ndvi_data_updated.csv` gerado.
+
+```{r}
+# data <- download_ndvi_espacial(
+#   center_lat = -30.03,
+#   center_lon = -51.23,
+#   date = "2020-01-01",
+#   km_ao_redor = 25,  
+#   save_csv = TRUE 
+# )
+
+# Faltou um pedaço da cidade ao sul, nova busca para adicioná-los e concatená-los.
+
+# dados_sul_cidade <- download_ndvi_espacial(
+#   center_lat = -30.27,  
+#   center_lon = -51.15,  
+#   date = "2020-01-01",
+#   km_ao_redor = 5,        
+#   save_csv = FALSE      
+# )
+
+# dados_novos <- download_ndvi_espacial(
+#    center_lat = -30.15,  
+#    center_lon = -51.20,  
+#    date = "2020-01-01",
+#    km_ao_redor = 10,        
+#    save_csv = TRUE      
+#  )
+
+# dados_novos2 <- download_ndvi_espacial(
+#   center_lat = -30.10,
+#   center_lon = -51.30,
+#   date = "2020-01-01",
+#   km_ao_redor = 15,
+#   save_csv = TRUE
+# )
+
+# dados_novos3 <- download_ndvi_espacial(
+#   center_lat = -30.00,
+#   center_lon = -51.10,
+#   date = "2020-01-01",
+#   km_ao_redor = 10,
+#   save_csv = TRUE
+# )
+
+# dados_novos4 <- download_ndvi_espacial(
+#   center_lat = -30.20,
+#   center_lon = -51.05,
+#   date = "2020-01-01",
+#   km_ao_redor = 10,
+#   save_csv = TRUE
+# )
+
+# dados_novos5 <- download_ndvi_espacial(
+#   center_lat = -30.06,
+#   center_lon = -51.00,
+#   date = "2020-01-01",
+#   km_ao_redor = 15,  
+#   save_csv = TRUE 
+# )
+
+# dados_novos6 <- download_ndvi_espacial(
+#    center_lat = -30.12,
+#    center_lon = -51.20,
+#    date = "2020-01-01",
+#    km_ao_redor = 15,  
+#    save_csv = TRUE 
+# )
+
+# dados_novos7 <- download_ndvi_espacial(
+#    center_lat = -29.95,
+#    center_lon = -51.25,
+#    date = "2020-01-01",
+#    km_ao_redor = 15,  
+#    save_csv = TRUE 
+# )
+
+# dados_novos8 <- download_ndvi_espacial(
+#    center_lat = -30.00,
+#    center_lon = -51.15,
+#    date = "2020-01-01",
+#    km_ao_redor = 15,  
+#    save_csv = TRUE 
+# )
+
+# dados_completos <- rbind(dados_completos, dados_novosx)
+ 
+# dados_completos <- dados_completos[!duplicated(dados_completos[c("latitude", "longitude")]),]
+
+# write.csv(dados_completos, "D:/Estatística Espacial/Seminário 2/complete_ndvi_data_updated.csv", row.names = FALSE)
+
+dados_completos <- read.csv("D:/Estatística Espacial/Seminário 2/complete_ndvi_data_updated.csv")
+```
+
+## Análise descritiva
+
+### Tabela descritiva
+
+A tabela de estatísticas descritivas do NDVI mostra uma distribuição variada de índices de vegetação na área analisada. O conjunto de dados possui 1545 observações.
+A média do NDVI é $0,495$, o que indica uma vegetação moderada na região, com uma mediana um pouco mais alta ($0,607$), sugerindo que a maioria das áreas possui vegetação mais densa do que a média. A ampla dispersão dos dados, com um desvio padrão de 0,344, aponta para uma grande variação nos valores de vegetação, que vão desde áreas com vegetação muito escassa ou ausente (mínimo de $-0,300$) até regiões com vegetação densa e saudável (máximo de $0,915$). A amplitude interquartil de $0,383$ e os quartis 1 e 3 ($0,363$ e $0,746$, respectivamente) indicam que metade dos dados de NDVI estão concentrados entre esses valores, com uma variação moderada entre eles. O coeficiente de variação elevado ($69,461\%$) reflete a alta variabilidade relativa da vegetação, indicando que a região apresenta uma diversidade considerável em termos de cobertura vegetal. 
+
+```{r, echo=FALSE}
+descritivas_ndvi <- dados_completos %>%
+  summarise(
+    `Média` = mean(ndvi, na.rm = TRUE),
+    `Mediana` = median(ndvi, na.rm = TRUE),
+    `Desvio Padrão` = sd(ndvi, na.rm = TRUE),
+    `Mínimo` = min(ndvi, na.rm = TRUE),
+    `Máximo` = max(ndvi, na.rm = TRUE),
+    `1º Quartil` = quantile(ndvi, 0.25, na.rm = TRUE),
+    `3º Quartil` = quantile(ndvi, 0.75, na.rm = TRUE),
+    `Amplitude Interquartil` = IQR(ndvi, na.rm = TRUE),
+    `Coeficiente de Variação` = (`Desvio Padrão` / `Média`) * 100,
+    `N` = n()
+  ) %>%
+  pivot_longer(everything(), names_to = "Estatística", values_to = "Valor") %>%
+  mutate(Valor = ifelse(Estatística == "N", as.integer(Valor), number(Valor, big.mark = ".", decimal.mark = ",")))
+
+tabela_descritiva <- descritivas_ndvi %>%
+  kable(
+    format = "html", 
+    col.names = c("Estatística", "Valor"),
+    align = c("l", "c"), 
+    caption = "Estatísticas Descritivas do NDVI",
+    escape = FALSE 
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE, 
+    position = "center" 
+  ) %>%
+  row_spec(0, bold = TRUE, background = "#4CAF50", color = "white") %>% 
+  column_spec(1, width = "10em", bold = TRUE) %>% 
+  column_spec(2, width = "6em") %>% 
+  row_spec(1:9, background = "#F8F8FF") %>% 
+  row_spec(10, bold = TRUE, background = "#D3D3D3") %>% 
+  add_header_above(c(" " = 2)) 
+
+tabela_descritiva
+```
+
+### Histograma
+
+O histograma da variável NDVI apresenta a distribuição dos valores do índice de vegetação por diferença normalizada (NDVI) para o conjunto de dados. O NDVI é um índice que varia de $-1$ (sem vegetação) a $1$ (vegetação densa), com valores próximos a zero indicando vegetação esparsa ou áreas não vegetadas.
+
+```{r}
+dados_hist <- hist(dados_completos$ndvi, breaks = 30, plot = FALSE)
+hist_df <- data.frame(
+  x = dados_hist$mids,
+  count = dados_hist$counts,
+  breaks_left = head(dados_hist$breaks, -1),  
+  breaks_right = tail(dados_hist$breaks, -1)  
+)
+
+hist_df$tooltip <- sprintf(
+  "Intervalo: %.3f - %.3f<br>Frequência: %d",
+  hist_df$breaks_left,
+  hist_df$breaks_right,
+  hist_df$count
+)
+
+hist_ndvi <- ggplot(hist_df, aes(x = x, y = count, text = tooltip)) +
+  geom_col(fill = "#69b3a2", color = "black", alpha = 0.8) +
+  labs(title = "Distribuição do NDVI",
+       x = "NDVI",
+       y = "Frequência") +
+  theme_minimal(base_size = 15) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
+  scale_x_continuous(labels = label_number(accuracy = 0.001))
+
+hist_ndvi_plotly <- ggplotly(hist_ndvi, tooltip = "text")
+hist_ndvi_plotly
+```
+
+As áreas analisadas parecem não ter uma distribuição equilibrada de vegetação densa e escassa.
+
+O histograma indica que a cidade é majoritariamente coberta por vegetação densa ou moderada, com algumas áreas de vegetação esparsa ou não vegetada (representadas pelo pico próximo a $-0,3$). O fato de não haver muitas observações entre $0,3$ e $0,5$ pode indicar que a área analisada tem poucos pontos com vegetação intermediária, com a maior parte das áreas sendo bem vegetadas ou sem vegetação. Esse padrão pode refletir um ambiente predominantemente natural ou manejado, com áreas mais urbanizadas ou degradadas ocupando uma proporção menor do território.
+
+### Boxplot
+
+```{r}
+boxplot_ndvi <- ggplot(dados_completos, aes(x = "", y = ndvi)) +
+  geom_boxplot(fill = "#404080", color = "black", outlier.colour = "red", outlier.shape = 1, alpha = 0.8) +
+  labs(title = "Boxplot do NDVI",
+       y = "NDVI",
+       x = NULL) +
+  theme_minimal(base_size = 15) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+boxplot_ndvi_plotly <- ggplotly(boxplot_ndvi)
+boxplot_ndvi_plotly
+```
+
+Ao analisar o boxplot da variável NDVI, é possível observar que a distribuição dos dados apresenta uma mediana de $0,607$, o que indica que a metade das observações está concentrada em valores de NDVI relativamente altos, sugerindo áreas com vegetação densa ou saudável. O primeiro quartil (Q1) de $0,363$ e o terceiro quartil (Q3) de $0,746$ mostram que $50\%$ dos dados estão entre esses valores, com a maior parte dos valores de NDVI variando entre vegetação esparsa (Q1) e vegetação densa (Q3). 
+
+## I de Moran
+
+O índice I de Moran é uma medida estatística usada para verificar a autocorrelação espacial de uma variável, ou seja, para verificar se valores similares de uma variável estão agrupados no espaço ou se estão dispersos. Um valor positivo de I de Moran indica que valores semelhantes estão próximos uns dos outros, enquanto um valor negativo sugere que valores opostos estão agrupados no espaço. Valores próximos de zero indicam que não há autocorrelação espacial significativa.
+
+O índice de Moran é usado para avaliar a autocorrelação espacial do NDVI, tanto em uma medida global quanto local. 
+
+Foram realizados dois testes para avaliar a autocorrelação espacial do Índice de Vegetação por Diferença Normalizada (NDVI) no conjunto de dados, utilizando o índice de Moran's:
+
+### Moran I Global - Teste sob Randomização (`moran_test`)
+
+Este teste calcula a estatística d o I de Moran para o conjunto de dados, que mede a autocorrelação espacial de uma variável. O teste sob randomização é uma abordagem não paramétrica que compara o valor observado do I de Moran com uma distribuição gerada por simulações aleatórias. A hipótese nula do teste é que não há autocorrelação espacial ($I = 0$), ou seja, os valores da variável (neste caso, o NDVI) são distribuídos aleatoriamente no espaço.
+
+O valor de I de Moran observado ($0,0356$) é muito próximo de zero, indicando uma autocorrelação espacial muito baixa. O p-valor de $0,05586$ sugere que a autocorrelação espacial não é significativa ao nível de $5\%$ ($\text{p-valor} > 0,05$). Isso significa que, sob a hipótese nula de que os valores de NDVI estão distribuídos aleatoriamente, não podemos rejeitar a hipótese nula com um nível de significância de $5\%$. A tendência é que não há um padrão claro de agrupamento ou dispersão dos valores de NDVI em todo o território analisado.
+
+
+### Moran I Global - Teste de Simulação de Monte Carlo (`moran_perm`)
+
+Este teste utiliza uma abordagem de simulação de Monte Carlo para avaliar a estatística de I de Moran. Em vez de assumir uma distribuição teórica para a estatística, a simulação gera uma distribuição empírica de $I$ de Moran a partir de múltiplas iterações (neste caso, $1000$ simulações), comparando o valor observado com essa distribuição gerada.
+
+O valor observado de I de Moran ($0,0356$) também é muito baixo, indicando uma autocorrelação espacial próxima de zero. O p-valor de $0,054$ sugere que a autocorrelação espacial observada não é significativa com um nível de significância de $5\%$ ($\text{p-valor} > 0.05$). Assim como no teste global, isso indica que não há evidências suficientes para rejeitar a hipótese nula de que os valores de NDVI são distribuídos aleatoriamente, e, portanto, não há um padrão espacial claro no território analisado.
+
+Ambos os testes (o de I de Moran sob randomização e o de Monte Carlo) indicam que o índice de NDVI não apresenta uma autocorrelação espacial significativamente diferente de zero no território analisado, embora o p-valor esteja muito próximo de 0,05, sugerindo uma tendência de autocorrelação espacial.
+
+```{r}
+calcular_moran_global <- function(data, shapefile, grid_size = 0.005) {
+  set.seed(sqrt(2))
+  pontos_sf <- st_as_sf(data, coords = c("longitude", "latitude"), crs = 4326)
+  
+  shapefile <- st_transform(shapefile, 4326)
+  bbox <- st_bbox(shapefile)
+  
+  grid <- st_make_grid(shapefile, 
+                      cellsize = c(grid_size, grid_size), 
+                      what = "polygons") %>%
+    st_sf() %>%
+    st_cast("POLYGON")
+  
+  grid <- st_intersection(grid, shapefile) %>%
+    st_make_valid() %>%
+    st_cast("POLYGON")
+  
+  grid <- grid[!st_is_empty(grid), ]
+  
+  point_grid_index <- st_intersects(pontos_sf, grid, sparse = FALSE)
+  data$grid_id <- max.col(point_grid_index)
+  
+  grid_data <- data %>%
+    group_by(grid_id) %>%
+    summarise(
+      ndvi_mean = mean(ndvi, na.rm = TRUE)
+    ) %>%
+    filter(!is.na(ndvi_mean))
+  
+  grid$ndvi_mean <- NA
+  grid$ndvi_mean[grid_data$grid_id] <- grid_data$ndvi_mean
+  
+  grid <- grid[!is.na(grid$ndvi_mean), ]
+  
+  nb <- poly2nb(grid, queen = TRUE)
+  
+  if (any(card(nb) == 0)) {
+    warning("Há ilhas (células sem vizinhos) na matriz de vizinhança. Isso pode causar erros nos cálculos.")
+  }
+  
+  w <- nb2listw(nb, style = "W", zero.policy = TRUE)
+  
+  moran_test <- moran.test(grid$ndvi_mean, w, zero.policy = TRUE)
+  
+  moran_perm <- moran.mc(grid$ndvi_mean, w, nsim = 999, zero.policy = TRUE)
+  
+  moran_scatterplot <- moran.plot(grid$ndvi_mean, w, zero.policy = TRUE, spChk = FALSE, labels = FALSE, xlab = "NDVI", ylab = "NDVI Espacialmente Defasado", quiet = TRUE)
+  
+  return(list(
+    moran_test = moran_test,
+    moran_perm = moran_perm,
+    moran_scatterplot = moran_scatterplot,
+    grid = grid,
+    weights = w
+  ))
+}
+
+calcular_moran_local <- function(moran_resultados) {
+  set.seed(sqrt(2))
+  local_moran <- localmoran(moran_resultados$grid$ndvi_mean, moran_resultados$weights, zero.policy = TRUE)
+  
+  moran_resultados$grid$local_i <- local_moran[, "Ii"]
+  moran_resultados$grid$p_value <- local_moran[, "Pr(z != E(Ii))"]
+  
+  return(moran_resultados)
+}
+
+plot_moran_resultados <- function(moran_resultados, shapefile) {
+  max_abs_value <- max(abs(moran_resultados$grid$local_i), na.rm = TRUE)
+  
+  pal_moran <- colorNumeric(
+    palette = "RdBu",
+    domain = c(-max_abs_value, max_abs_value), 
+    na.color = "transparent"
+  )
+  
+  pal_pvalue <- colorNumeric(
+    palette = "Reds",
+    domain = c(0, 1),
+    na.color = "transparent"
+  )
+  
+  m1 <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data = moran_resultados$grid,
+                fillColor = ~pal_moran(local_i),
+                fillOpacity = 0.8,
+                weight = 0.5,
+                color = "#444444",
+                popup = ~paste("Local Moran's I:", round(local_i, 3), "<br>P-value:", round(p_value, 3))) %>%
+    addPolygons(data = shapefile,
+                weight = 2,
+                opacity = 1,
+                color = "#444444",
+                fillOpacity = 0,
+                dashArray = "3") %>%
+    addLegend(pal = pal_moran,
+              values = c(-max_abs_value, 0, max_abs_value), # Valores para a legenda
+              title = "Local Moran's I",
+              position = "bottomright")
+  
+  m2 <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data = moran_resultados$grid,
+                fillColor = ~pal_pvalue(p_value),
+                fillOpacity = 0.8,
+                weight = ifelse(moran_resultados$grid$p_value < 0.05, 2, 0.5), 
+                color = ifelse(moran_resultados$grid$p_value < 0.05, "black", "#444444"), 
+                group = "significativo",
+                popup = ~paste("Local Moran's I:", round(local_i, 3), "<br>P-value:", round(p_value, 3))) %>%
+    addPolygons(data = shapefile,
+                weight = 2,
+                opacity = 1,
+                color = "#444444",
+                fillOpacity = 0,
+                dashArray = "3") %>%
+    addLegend(pal = pal_pvalue,
+              values = moran_resultados$grid$p_value,
+              title = "P-value",
+              position = "bottomright") %>%
+    addLayersControl(overlayGroups = c("significativo"),
+                     options = layersControlOptions(collapsed = FALSE))
+  
+  return(list(moran_map = m1, pvalue_map = m2))
+}
+
+poa_shape <- read_municipality(code_muni = 4314902, year = 2020)
+
+grid_size <- 0.005
+
+moran_resultados <- calcular_moran_global(dados_completos, poa_shape, grid_size = grid_size)
+moran_resultados <- calcular_moran_local(moran_resultados)
+
+print(moran_resultados$moran_test)
+print(moran_resultados$moran_perm)
+
+plot_moran_resultados(moran_resultados, poa_shape)$moran_map
+plot_moran_resultados(moran_resultados, poa_shape)$pvalue_map
+```
+
+O índice de Moran local varia entre valores negativos, próximos de zero e positivos. Dependendo do valor, as cores indicam diferentes tipos de padrões espaciais:
+
+Índice de Moran positivo (valores próximos a $1$) indica que as células vizinhas possuem valores semelhantes ao da célula central, ou seja, agregação espacial (clusters de valores semelhantes).
+
+Índice de Moran negativo (valores próximos a $-1$) indica que as células vizinhas possuem valores muito diferentes, ou seja, dispersão espacial (valores extremos, ou "outliers").
+
+Índice de Moran próximo de zero sugere que não há um padrão claro de autocorrelação espacial, ou seja, distribuição aleatória dos valores.
+
+A autocorrelação espacial do NDVI no seu conjunto de dados tem uma distribuição moderada, o que sugere que as áreas vizinhas tendem a ter valores de NDVI semelhantes ou diferentes, mas sem uma forte concentração ou dispersão extrema. Há uma mistura de áreas com autocorrelação espacial positiva e negativa, mas sem padrões extremamente fortes de agrupamento ou dispersão. A presença de poucos pontos próximos a $-4$ e $4$ indica que as áreas com autocorrelação espacial muito forte (positiva ou negativa) são raras.
+
+O mapa de p-valores ajuda a identificar áreas significativas em termos de autocorrelação espacial. Regiões com p-valores baixos (abaixo de 0.05) revelam padrões espaciais claros e significativos, enquanto áreas com p-valores altos indicam que a autocorrelação observada pode ser devida ao acaso e não apresenta um padrão espacial relevante.
+
+
+## Modelo com krigagem
+
+### Função para criação do modelo
+
+A função `criar_modelo_ndvi` cria um modelo de krigagem para estimar o NDVI (Índice de Vegetação por Diferença Normalizada) em uma área espacialmente distribuída, com base nos dados de latitude, longitude e NDVI. Primeiramente, os dados de entrada são convertidos em um objeto espacial (usando as coordenadas de longitude e latitude) com o pacote `sp`, definindo o sistema de coordenadas geográficas (WGS84). Em seguida, é calculado o variograma (um gráfico que descreve a dependência espacial dos dados) usando a função variogram. 
+
+A partir desse variograma, o modelo é ajustado utilizando o modelo esférico (`Sph`) para descrever como a variabilidade do NDVI muda com a distância espacial. Depois, é criado um grid regular de pontos (um conjunto de coordenadas distribuídas ao longo do espaço) para a estimativa do NDVI. A krigagem é então realizada com o modelo ajustado, gerando uma estimativa do NDVI para o grid de pontos. A função retorna o variograma calculado, o modelo ajustado e os resultados da krigagem (estimativas de NDVI para o grid). Esse processo é utilizado para prever valores de NDVI em locais não amostrados, com base na correlação espacial dos dados observados.
+
+```{r}
+criar_modelo_ndvi <- function(data) {
+  set.seed(sqrt(2))
+  sp_data <- data
+  coordinates(sp_data) <- ~longitude+latitude
+  proj4string(sp_data) <- CRS("+proj=longlat +datum=WGS84")
+  
+  vgm <- variogram(ndvi ~ 1, sp_data)
+  
+  fit <- fit.variogram(vgm, model = vgm("Sph"))
+  
+  grid <- expand.grid(
+    longitude = seq(min(data$longitude), max(data$longitude), length = 50),
+    latitude = seq(min(data$latitude), max(data$latitude), length = 50)
+  )
+  coordinates(grid) <- ~longitude+latitude
+  gridded(grid) <- TRUE
+  proj4string(grid) <- CRS("+proj=longlat +datum=WGS84")
+  
+  # krigagem
+  kriged <- krige(ndvi ~ 1, sp_data, grid, model = fit)
+  
+  return(list(variogram = vgm, fitted_model = fit, kriged_data = kriged))
+}
+```
+
+### Função para gráfico dos resultados
+
+A função `plot_ndvi_resultados` foi criada para gerar um gráfico interativo que visualiza os resultados da krigagem do NDVI, integrando um mapa interativo e o variograma. Primeiramente, a função converte os resultados da krigagem em um data.frame e cria uma grade rasterizada, associando as previsões de NDVI (armazenadas em var1.pred) à sua localização geográfica (longitude e latitude). Em seguida, o raster é mascarado para se ajustar a um shapefile (limites geográficos) fornecido e atribui uma paleta de cores aos valores de NDVI. A função utiliza o leaflet para gerar um mapa interativo com camadas de raster e polígonos, incluindo uma legenda e uma escala. Também é gerado o gráfico do variograma com o modelo ajustado. O resultado final é um mapa interativo e a visualização do variograma para análise espacial do NDVI.
+
+
+```{r}
+plot_ndvi_resultados <- function(model_resultados, shapefile) {
+  
+  kriged_df <- as.data.frame(model_resultados$kriged_data)
+  
+  r <- raster(nrows = 50, ncols = 50)
+  extent(r) <- extent(min(kriged_df$longitude), max(kriged_df$longitude),
+                     min(kriged_df$latitude), max(kriged_df$latitude))
+  r <- rasterize(kriged_df[, c("longitude", "latitude")], r, kriged_df$var1.pred)
+  crs(r) <- CRS("+proj=longlat +datum=WGS84")
+  
+  shapefile_sf <- st_transform(shapefile, 4326)
+  
+  r_masked <- mask(r, as(shapefile_sf, "Spatial"))
+  
+  pal <- colorNumeric(
+    palette = colorRampPalette(c("#a50026", "#fdae61", "#d9ef8b", "#006837"))(100),
+    domain = values(r_masked),
+    na.color = "transparent"
+  )
+  
+  m <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%  # Better base map
+    addRasterImage(r_masked, 
+                  colors = pal, 
+                  opacity = 0.8) %>%
+    addPolygons(data = shapefile_sf,
+                weight = 2,
+                opacity = 1,
+                color = "#444444",
+                fillOpacity = 0,
+                dashArray = "3") %>%
+    addLegend(pal = pal,
+              values = values(r_masked),
+              title = "NDVI Values",
+              position = "bottomright",
+              labFormat = labelFormat(digits = 2)) %>%
+    addScaleBar(position = "bottomleft") %>%
+    addMiniMap(position = "bottomleft", 
+               toggleDisplay = TRUE)
+  
+  plot(model_resultados$variogram, 
+       model_resultados$fitted_model, 
+       main = "NDVI Variogram",
+       pch = 19)
+  
+  return(m)
+}
+```
+
+### Criação do modelo
+
+O código abaixo cria um modelo de krigagem ordinária (kriging) para os dados de NDVI, utilizando a função `criar_modelo_ndvi`. Essa função realiza a interpolação espacial dos valores de NDVI, criando um modelo que leva em consideração a dependência espacial entre as observações e ajusta um modelo variográfico para prever os valores em locais não amostrados.
+
+Esse modelo de krigagem ordinária assume que a média do valor da variável em qualquer local é constante e que as flutuações ao redor dessa média seguem uma estrutura espacial previsível, o que é adequado para dados como o NDVI, que variam de acordo com a localização.
+
+```{r}
+model <- criar_modelo_ndvi(dados_completos)
+```
+
+### Avaliação
+
+As funções realizam a avaliação do modelo de krigagem gerado, calculando métricas importantes para avaliar a qualidade da krigagem. A função `validar_krigagem` calcula algumas métricas, como o efeito pepita (`nugget`), o patamar total (`sill`), o alcance (`range`), a razão de variância estrutural, além da média e desvio padrão da variância de krigagem. A função retorna essas métricas, juntamente com resumos das predições e da variância. As funções `criar_avaliacao_krigagem` e `criar_interpretacao_krigagem` geram tabelas em HTML, uma com as métricas calculadas e outra com interpretações dessas métricas, ajudando a avaliar a qualidade do modelo de krigagem, a dependência espacial e a confiabilidade das predições. 
+
+
+```{r}
+validar_krigagem <- function(model) {
+  variogram_fit <- model$fitted_model
+  
+  kriged_data <- model$kriged_data
+  predictions <- kriged_data$var1.pred
+  variance <- kriged_data$var1.var
+  
+  nugget <- variogram_fit$psill[1]  # Efeito pepita
+  sill <- sum(variogram_fit$psill)  # Patamar total
+  range <- variogram_fit$range[2]   # Alcance
+  
+  structural_variance <- (sill - nugget) / sill
+  
+  mean_variance <- mean(variance, na.rm = TRUE)
+  sd_variance <- sd(variance, na.rm = TRUE)
+  
+  resultados <- data.frame(
+    Metric = c("Nugget", "Sill", "Range", "Structural Variance Ratio",
+               "Mean Kriging Variance", "SD Kriging Variance"),
+    Value = c(nugget, sill, range, structural_variance,
+              mean_variance, sd_variance)
+  )
+  
+  return(list(
+    metrics = resultados,
+    prediction_summary = summary(predictions),
+    variance_summary = summary(variance)
+  ))
+}
+
+criar_avaliacao_krigagem <- function(metrics) {
+  assessment <- data.frame(
+    Metrica = c(
+      "Efeito Pepita (Nugget)",
+      "Patamar (Sill)",
+      "Alcance (Range)",
+      "Razão de Variância Estrutural",
+      "Média da Variância de Krigagem",
+      "Desvio Padrão da Variância"
+    ),
+    Valor = c(
+      format(metrics$Value[1], digits = 4),
+      format(metrics$Value[2], digits = 4),
+      format(metrics$Value[3], digits = 4),
+      paste0(format(metrics$Value[4] * 100, digits = 2), "%"),
+      format(metrics$Value[5], digits = 4),
+      format(metrics$Value[6], digits = 4)
+    )
+  )
+  
+  styled_table <- assessment %>%
+    kable(format = "html", 
+          align = "c", 
+          col.names = c("Métrica", "Valor")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                  full_width = FALSE,
+                  position = "center") %>%
+    column_spec(1, bold = TRUE, color = "white", background = "#4CAF50") %>%
+    column_spec(2, color = "#4CAF50", background = "#F0F0F0", width = "5cm") %>%
+    add_header_above(c("Avaliação da Krigagem" = 2))
+  
+  return(styled_table)
+}
+
+criar_interpretacao_krigagem <- function(metrics) {
+  structural_var_ratio <- metrics$Value[4]
+  nugget <- metrics$Value[1]
+  mean_variance <- metrics$Value[5]
+  
+  interpretation <- data.frame(
+    Metrica = c(
+      "Qualidade do Modelo",
+      "Dependência Espacial",
+      "Confiabilidade das Predições"
+    ),
+    Avaliacao = c(
+      ifelse(structural_var_ratio > 0.75, "Excelente", 
+             ifelse(structural_var_ratio > 0.5, "Boa", "Regular")),
+      ifelse(nugget < 0.05, "Forte", 
+             ifelse(nugget < 0.15, "Moderada", "Fraca")),
+      ifelse(mean_variance < 0.05, "Alta", 
+             ifelse(mean_variance < 0.15, "Moderada", "Baixa"))
+    )
+  )
+  
+  styled_table <- interpretation %>%
+    kable(format = "html", 
+          align = "c", 
+          col.names = c("Critério", "Avaliação")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                  full_width = FALSE,
+                  position = "center") %>%
+    column_spec(1, bold = TRUE, color = "white", background = "#4CAF50") %>%
+    column_spec(2, color = "#4CAF50", background = "#F0F0F0", width = "5cm") %>%
+    add_header_above(c("Interpretação dos Resultados" = 2))
+  
+  return(styled_table)
+}
+```
+
+```{r, echo=FALSE}
+validacao <- validar_krigagem(model)
+tabela_metricas <- criar_avaliacao_krigagem(validacao$metrics)
+tabela_interpretacao <- criar_interpretacao_krigagem(validacao$metrics)
+tabela_metricas
+tabela_interpretacao
+```
+
+A tabela "Avaliação da Krigagem" apresenta as métricas para avaliar o desempenho do modelo de krigagem. O Efeito Pepita (Nugget) de $0.02174$ indica uma pequena variação aleatória, sugerindo que os dados têm uma estrutura espacial relativamente forte. O Patamar (Sill) de $0.1281$ é o valor total de variância no modelo, enquanto o Alcance (Range) de $16.62$ representa a distância a partir da qual a correlação espacial entre os dados diminui. A Razão de Variância Estrutural de 83% indica que a maior parte da variação é atribuída à estrutura espacial, o que é um bom sinal de que a krigagem está capturando a variação espacial. A Média da Variância de Krigagem de $0.03982$ e o Desvio Padrão de $0.01745$ sugerem que a variância das predições é relativamente baixa e estável.
+
+A tabela "Interpretação dos Resultados" fornece uma avaliação qualitativa com base nas métricas calculadas. A "Qualidade do Modelo" é classificada como excelente, devido à alta razão de variância estrutural ($83\%$), indicando um bom ajuste do modelo de krigagem. A "Dependência Espacial" é considerada forte, com um nugget baixo (0.02174), o que significa que há uma forte correlação espacial nos dados. A "Confiabilidade das Predições" é alta, pois a variância média de krigagem é baixa, indicando que as predições feitas pelo modelo podem ser confiáveis.
+
+### Mapa
+
+O mapa abaixo carrega os dados geoespaciais do município de Porto Alegre (código $4314902$) para o ano de $2020$, utilizando a função `read_municipality` da biblioteca `geobr`. Foram plotados os resultados da krigagem do índice NDVI, utilizando a função 'plot_ndvi_results', que cria um mapa interativo com os dados de NDVI sobre o território de Porto Alegre, permitindo a visualização das predições do modelo de krigagem sobre a área geográfica.
+
+
+```{r}
+poa_shape <- read_municipality(code_muni = 4314902, year = 2020)
+plot_ndvi_resultados(model, poa_shape)
+```
+
+A cor verde predominante reflete uma maior cobertura vegetal, enquanto as áreas vermelhas podem indicar regiões com vegetação menos densa ou até mesmo áreas desprovidas de vegetação significativa. A variação de cores no mapa permite uma rápida visualização das zonas de maior e menor vegetação em Porto Alegre.
+
+
+## Modelo ICAR
+
+Para este trabalho, o modelo ICAR (Intrinsic Conditional Autoregressive Model) pode ser adequado para dados de NDVI, pois captura a dependência espacial entre as observações, o que é comum em variáveis como o NDVI, que tende a ter valores mais semelhantes em áreas geograficamente próximas. Esse modelo suaviza a variabilidade e melhora a precisão das previsões, especialmente em regiões com dados esparsos ou ruído. Ao levar em consideração as relações espaciais entre as células de uma grade e sua proximidade geográfica, o ICAR é eficaz em ajustar as estimativas, sendo ideal para áreas com padrões de vegetação correlacionados espacialmente.
+
+Posteriormente, testamos um modelo não visto em aula, o modelo SAR.
+
+O modelo SAR (Spatial Autoregressive Model) é uma boa opção para dados espaciais com forte dependência direta entre as observações, como em variáveis geográficas ou ambientais. A principal diferença entre o SAR e o ICAR é a forma como modelam a dependência espacial: o SAR incorpora um termo de dependência espacial diretamente nas variáveis dependentes, enquanto o ICAR utiliza uma estrutura de vizinhança para modelar a autocorrelação espacial, suavizando as previsões com base nessas relações.
+
+### Função para criação do modelo
+
+O código abaixo implementa a criação de um modelo ICAR (Intrinsic Conditional Autoregressive Model) para análise espacial dos valores do NDVI em Porto Alegre. Primeiro, ele converte os dados de pontos (com coordenadas de latitude e longitude) para um formato espacial (sf) e ajusta uma grade sobre o território de interesse, que é cortada para se ajustar ao limite do shapefile. 
+
+A partir dessa grade, o código gera vizinhanças espaciais para cada célula da grade, considerando as conexões entre elas, e agrupa os dados de NDVI para calcular as médias, desvios padrão e o número de observações por célula. O modelo ICAR é então ajustado usando a função INLA (Integrated Nested Laplace Approximations), com uma estrutura espacial dependente das vizinhanças. 
+
+O modelo gerado é retornado juntamente com os dados da grade e a matriz de vizinhança. Uma função de visualização usa o pacote Leaflet para criar um mapa interativo, onde as células da grade são coloridas de acordo com os valores ajustados do modelo, permitindo a interpretação espacial dos resultados do NDVI.
+
+
+```{r}
+criar_ndvi_icar <- function(data, shapefile) {
+  set.seed(sqrt(2))
+  pontos_sf <- st_as_sf(data, coords = c("longitude", "latitude"), 
+                        crs = 4326)
+  
+  shapefile <- st_transform(shapefile, 4326)
+  
+  bbox <- st_bbox(shapefile)
+  grid_size <- 0.005
+  
+  grid <- st_make_grid(shapefile, 
+                      cellsize = c(grid_size, grid_size), 
+                      what = "polygons") %>%
+    st_sf() %>%
+    st_cast("POLYGON")
+  
+  grid <- st_intersection(grid, shapefile) %>%
+    st_make_valid() %>%
+    st_cast("POLYGON")
+    
+  grid <- grid[!st_is_empty(grid), ]
+  
+  grid_buffered <- st_buffer(grid, dist = grid_size/50)
+  
+  nb <- poly2nb(st_geometry(grid_buffered), 
+                queen = TRUE, 
+                snap = grid_size/5)
+  
+  gc <- spdep::n.comp.nb(nb)
+  if (gc$nc > 1) {
+    cat("Encontrados", gc$nc, "componentes desconectados. Usando o maior componente.\n")
+    biggest <- which.max(table(gc$comp.id))
+    keep <- gc$comp.id == biggest
+    grid <- grid[keep,]
+    nb <- poly2nb(st_geometry(grid), 
+                  queen = TRUE, 
+                  snap = grid_size/5)
+  }
+  
+  W <- nb2mat(nb, style = "B", zero.policy = TRUE)
+  
+  point_grid_index <- st_intersects(pontos_sf, grid, sparse = FALSE)
+  
+  if(all(!point_grid_index)) {
+    stop("Nenhum ponto no grid, cheque seus dados.")
+  }
+  
+  data$grid_id <- max.col(point_grid_index)
+  
+  grid_data <- data %>%
+    group_by(grid_id) %>%
+    summarise(
+      ndvi_mean = mean(ndvi, na.rm = TRUE),
+      ndvi_sd = sd(ndvi, na.rm = TRUE),
+      n = n()
+    ) %>%
+    filter(!is.na(ndvi_mean))  # Remove cells with no data
+  
+  n_cells <- nrow(grid)
+  
+  full_grid_data <- data.frame(
+    grid_id = 1:n_cells,
+    ndvi_mean = NA,
+    ndvi_sd = NA,
+    n = 0
+  )
+  
+  full_grid_data[grid_data$grid_id, c("ndvi_mean", "ndvi_sd", "n")] <- 
+    grid_data[, c("ndvi_mean", "ndvi_sd", "n")]
+  
+  formula <- ndvi_mean ~ 1 + f(grid_id, model = "besag", graph = W)
+  
+  model <- try(inla(
+    formula,
+    family = "gaussian",
+    data = full_grid_data,
+    control.predictor = list(compute = TRUE),
+    control.compute = list(dic = TRUE, waic = TRUE),
+    control.family = list(
+      hyper = list(
+        prec = list(
+          prior = "pc.prec",
+          param = c(1, 0.01)  # Ajustar estes valores
+        )
+      )
+    ),
+    control.inla = list(strategy = "gaussian")
+  ))
+  if(inherits(model, "try-error")) {
+    stop("O modelo INLA falhou. Cheque seus dados e estrutura espacial.")
+  }
+  
+  return(list(
+    model = model,
+    grid = grid,
+    data = full_grid_data,
+    W = W
+  ))
+}
+
+plot_icar_resultados <- function(icar_resultados, shapefile) {
+  grid <- icar_resultados$grid
+  grid$fitted <- icar_resultados$model$summary.fitted.values$mean
+  
+  pal <- colorNumeric(
+    palette = colorRampPalette(c("#a50026", "#fdae61", "#d9ef8b", "#006837"))(100),
+    domain = grid$fitted,
+    na.color = "transparent"
+  )
+  
+  m <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data = grid,
+                fillColor = ~pal(fitted),
+                fillOpacity = 0.8,
+                weight = 0.5,
+                color = "#444444") %>%
+    addPolygons(data = shapefile,
+                weight = 2,
+                opacity = 1,
+                color = "#444444",
+                fillOpacity = 0,
+                dashArray = "3") %>%
+    addLegend(pal = pal,
+              values = grid$fitted,
+              title = "NDVI Values (ICAR)",
+              position = "bottomright",
+              labFormat = labelFormat(digits = 2)) %>%
+    addScaleBar(position = "bottomleft") %>%
+    addMiniMap(position = "bottomleft", 
+               toggleDisplay = TRUE)
+  
+  return(m)
+}
+```
+
+### Criação do modelo
+
+O modelo ICAR foi criado para os dados de NDVI (índice de vegetação) com o uso do shapefile de Porto Alegre. Durante a construção do modelo, foi detectada a presença de $5$ componentes desconectados, o que significa que o conjunto de dados estava fragmentado em diferentes regiões não conectadas espacialmente. O modelo então escolheu o maior componente conectado (ou seja, a maior área de dados contínuos) para realizar a análise, descartando as regiões menores e desconectadas.
+
+
+```{r}
+icar_model <- criar_ndvi_icar(dados_completos, poa_shape)
+```
+
+### Avaliação
+
+```{r, fig.align='center', echo=FALSE}
+dic <- icar_model$model$dic$dic
+waic <- icar_model$model$waic$waic
+log_likelihood <- icar_model$model$mlik[1]
+
+tabela <- data.frame(
+  Métrica = c("DIC", "WAIC", "Log-verossimilhança"),
+  Valor = c(dic, waic, log_likelihood)
+)
+
+tabela_kable <- tabela %>%
+  kable(format = "html", align = "c", col.names = c("Métrica", "Valor")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                full_width = FALSE,
+                position = "center") %>%
+  column_spec(1, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  column_spec(2, color = "#4CAF50", background = "#F0F0F0", width = "5cm") %>%
+  add_header_above(c("Resumo do Modelo" = 2))
+
+tabela_kable
+```
+
+
+### Mapa
+
+Foi gerado um mapa visualizando os resultados do modelo ICAR ajustado aos dados NDVI, utilizando o shapefile do município de Porto Alegre para representar a distribuição espacial das previsões:
+
+```{r}
+plot_icar_resultados(icar_model, poa_shape)
+```
+
+O mapa de NDVI revela uma variação significativa na vegetação ao longo do município de Porto Alegre. As áreas representadas pela cor verde (NDVI $0.6$) indicam uma vegetação mais saudável e densa, possivelmente em regiões com maior cobertura vegetal ou boa qualidade ambiental. Já as áreas em vermelho (NDVI $0.35$) sugerem vegetação mais esparsa, o que pode estar relacionado a fatores como urbanização, degradação ambiental ou outras condições adversas. 
+
+
+## Modelo SAR
+
+O modelo SAR (Spatial Autoregressive Model) é utilizado para modelar a dependência espacial entre as observações, levando em conta a influência das variáveis em regiões vizinhas. No contexto dos dados de NDVI, esse modelo captura como as medições em uma área influenciam as de áreas adjacentes, considerando uma estrutura de vizinhança para ajustar as previsões. A principal característica do modelo SAR é incluir uma componente de autocorrelação espacial diretamente no termo de resposta, representando a dependência espacial entre as observações da variável de interesse.
+
+A dependência espacial é diretamente incorporada na variável dependente (NDVI). Ou seja, no modelo SAR, as observações de uma região são influenciadas pelas observações das regiões vizinhas. A autocorrelação espacial é modelada no termo de resposta, e as previsões são ajustadas levando em conta essa dependência direta entre os pontos de dados.
+
+Enquanto o SAR modela a autocorrelação espacial de forma direta na variável dependente, o ICAR utiliza uma abordagem mais suave e baseada em suavização das estimativas das observações, levando em consideração a estrutura de vizinhança, mas com menor ênfase na influência direta sobre a variável de interesse.
+
+### Função para criação do modelo
+
+O modelo SAR é criado abaixo para os dados de NDVI com base no shapefile do município de Porto Alegre. A função começa transformando os dados em formato espacial, criando uma grade sobre o mapa e associando cada ponto à célula da grade mais próxima. Em seguida, é calculada a matriz de vizinhança ($W$) com base na proximidade entre as células. 
+
+O modelo é então ajustado usando o pacote INLA, com um termo de dependência espacial, considerando tanto o modelo `Besag` quanto um modelo genérico para a estrutura de vizinhança. Após a criação do modelo, os resultados são visualizados em um mapa interativo, mostrando os valores ajustados de NDVI para cada célula da grade, com cores representando diferentes níveis de vegetação.
+
+
+```{r}
+criar_ndvi_sar <- function(data, shapefile, rho = 0.5) {
+  set.seed(sqrt(2))
+  pontos_sf <- st_as_sf(data, coords = c("longitude", "latitude"), 
+                        crs = 4326)
+  
+  shapefile <- st_transform(shapefile, 4326)
+  
+  bbox <- st_bbox(shapefile)
+  grid_size <- 0.005
+  
+  grid <- st_make_grid(shapefile, 
+                      cellsize = c(grid_size, grid_size), 
+                      what = "polygons") %>%
+    st_sf() %>%
+    st_cast("POLYGON")
+  
+  grid <- st_intersection(grid, shapefile) %>%
+    st_make_valid() %>%
+    st_cast("POLYGON")
+    
+  grid <- grid[!st_is_empty(grid), ]
+  
+  grid_buffered <- st_buffer(grid, dist = grid_size/50)
+  
+  nb <- poly2nb(st_geometry(grid_buffered), 
+                queen = TRUE, 
+                snap = grid_size/5)
+  
+  gc <- spdep::n.comp.nb(nb)
+  if (gc$nc > 1) {
+    cat("Encontrados", gc$nc, "componentes desconectados. Usando o maior componente.\n")
+    biggest <- which.max(table(gc$comp.id))
+    keep <- gc$comp.id == biggest
+    grid <- grid[keep,]
+    nb <- poly2nb(st_geometry(grid), 
+                  queen = TRUE, 
+                  snap = grid_size/5)
+  }
+  
+  W <- nb2mat(nb, style = "B", zero.policy = TRUE)
+  
+  point_grid_index <- st_intersects(pontos_sf, grid, sparse = FALSE)
+  
+  if(all(!point_grid_index)) {
+    stop("Nenhum ponto no grid, cheque seus dados.")
+  }
+  
+  data$grid_id <- max.col(point_grid_index)
+  
+  grid_data <- data %>%
+    group_by(grid_id) %>%
+    summarise(
+      ndvi_mean = mean(ndvi, na.rm = TRUE),
+      ndvi_sd = sd(ndvi, na.rm = TRUE),
+      n = n()
+    ) %>%
+    filter(!is.na(ndvi_mean))
+  
+  n_cells <- nrow(grid)
+  
+  full_grid_data <- data.frame(
+    grid_id = 1:n_cells,
+    ndvi_mean = NA,
+    ndvi_sd = NA,
+    n = 0
+  )
+  
+  full_grid_data[grid_data$grid_id, c("ndvi_mean", "ndvi_sd", "n")] <- 
+    grid_data[, c("ndvi_mean", "ndvi_sd", "n")]
+  
+  full_grid_data$grid_id.1 <- full_grid_data$grid_id
+
+  formula <- ndvi_mean ~ 1 + f(grid_id, model = "besag", graph = W) + 
+    f(grid_id.1, model = "generic1", Cmatrix = INLA::inla.as.sparse(diag(n_cells) - rho * W))
+  
+  model <- try(inla(
+    formula,
+    family = "gaussian",
+    data = full_grid_data,
+    control.predictor = list(compute = TRUE),
+    control.compute = list(dic = TRUE, waic = TRUE),
+    control.inla = list(strategy = "gaussian")
+  ))
+  
+  if(inherits(model, "try-error")) {
+    stop("O modelo INLA falhou. Cheque seus dados e estrutura espacial.")
+  }
+  
+  return(list(
+    model = model,
+    grid = grid,
+    data = full_grid_data,
+    W = W
+  ))
+}
+
+plot_sar_resultados <- function(sar_resultados, shapefile) {
+  grid <- sar_resultados$grid
+  grid$fitted <- sar_resultados$model$summary.fitted.values$mean
+  
+  pal <- colorNumeric(
+    palette = colorRampPalette(c("#a50026", "#fdae61", "#d9ef8b", "#006837"))(100),
+    domain = grid$fitted,
+    na.color = "transparent"
+  )
+  
+  m <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolygons(data = grid,
+                fillColor = ~pal(fitted),
+                fillOpacity = 0.8,
+                weight = 0.5,
+                color = "#444444") %>%
+    addPolygons(data = shapefile,
+                weight = 2,
+                opacity = 1,
+                color = "#444444",
+                fillOpacity = 0,
+                dashArray = "3") %>%
+    addLegend(pal = pal,
+              values = grid$fitted,
+              title = "NDVI Values (SAR)",  # Changed title to reflect SAR model
+              position = "bottomright",
+              labFormat = labelFormat(digits = 2)) %>%
+    addScaleBar(position = "bottomleft") %>%
+    addMiniMap(position = "bottomleft", 
+               toggleDisplay = TRUE)
+  
+  return(m)
+}
+```
+
+### Criação do modelo
+
+Foi criado um modelo SAR (Spatial Autoregressive Model) para os dados de NDVI, utilizando as coordenadas de latitude e longitude presentes no conjunto de dados e um shapefile da área de Porto Alegre. Durante a criação do modelo, foram identificados 5 componentes desconectados na estrutura espacial. O maior componente foi selecionado para a análise, e o modelo foi ajustado levando em conta a dependência espacial entre as observações. A avaliação do modelo foi realizada através das métricas DIC, WAIC e Log-verossimilhança.
+
+```{r}
+sar_model <- criar_ndvi_sar(dados_completos, poa_shape)
+```
+
+### Avaliação
+
+```{r, fig.align='center', echo=FALSE}
+dic <- sar_model$model$dic$dic
+waic <- sar_model$model$waic$waic
+log_likelihood <- sar_model$model$mlik[1]
+
+tabela <- data.frame(
+  Métrica = c("DIC", "WAIC", "Log-verossimilhança"),
+  Valor = c(dic, waic, log_likelihood)
+)
+
+tabela_kable <- tabela %>%
+  kable(format = "html", align = "c", col.names = c("Métrica", "Valor")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+                full_width = FALSE,
+                position = "center") %>%
+  column_spec(1, bold = TRUE, color = "white", background = "#4CAF50") %>%
+  column_spec(2, color = "#4CAF50", background = "#F0F0F0", width = "5cm") %>%
+  add_header_above(c("Resumo do Modelo" = 2))
+
+tabela_kable
+```
+
+Ao comparar os modelos ICAR e SAR com base nas métricas DIC, WAIC e log-verossimilhança, podemos analisar o desempenho relativo de cada modelo.
+
+* DIC: Para o modelo ICAR, o DIC é $544.1125$, enquanto para o modelo SAR é $543.6517$. Valores mais baixos de DIC indicam melhor ajuste do modelo aos dados, com penalização pela complexidade. Neste caso, o modelo SAR apresenta um DIC ligeiramente melhor que o ICAR, sugerindo que o modelo SAR tem uma melhor adequação aos dados, levando em consideração a simplicidade do modelo.
+
+* WAIC: O WAIC do modelo ICAR é $545.2054$ e o do modelo SAR é $545.6971$. O WAIC também é uma métrica que penaliza a complexidade do modelo, sendo que valores mais baixos indicam um melhor modelo. O ICAR tem um valor de WAIC ligeiramente melhor, indicando que o modelo ICAR pode ser um pouco mais eficiente em termos de ajuste aos dados em relação ao SAR.
+
+* Log-verossimilhança: A log-verossimilhança do modelo ICAR é $-2157.6876$, enquanto para o SAR é $-2165.3460$. O valor da log-verossimilhança mais próximo de zero é melhor, já que um valor mais negativo indica um ajuste pior. Nesse caso, o modelo ICAR tem uma log-verossimilhança mais alta (menos negativa), o que sugere um melhor ajuste em termos de log-verossimilhança.
+
+Comparando as métricas, os resultados entre os modelos ICAR e SAR são muito semelhantes, com pequenas diferenças nos valores de DIC, WAIC e log-verossimilhança. O modelo ICAR apresenta um desempenho ligeiramente melhor em termos de WAIC e log-verossimilhança. No entanto, as diferenças são pequenas, o que indica que ambos os modelos têm um desempenho muito próximo e são igualmente válidos
+
+### Mapa
+
+Abaixo temos a visualização dos resultados do modelo SAR (Spatial Autoregressive Model) aplicados aos dados de NDVI. O mapa exibe os valores ajustados do modelo SAR para cada célula de uma grade espacial sobreposta ao município, utilizando uma paleta de cores para representar as variações nos valores do NDVI.
+
+
+```{r}
+plot_sar_resultados(sar_model, poa_shape)
+```
+
+No mapa gerado pelos resultados do modelo SAR, os valores de NDVI variam principalmente entre $0,35$ e $0,6$, com as áreas de menor vegetação (valores mais baixos) representadas pela cor avermelhada, e as áreas com maior vegetação (valores mais altos) representadas pela cor verde. A variação entre essas cores indica a diferença na cobertura vegetal ou na saúde da vegetação no município de Porto Alegre, com áreas mais próximas de $0,6$ indicando vegetação mais densa ou saudável e áreas próximas de $0,35$ sugerindo vegetação mais esparsa ou menos saudável. 
+
+# Conclusão
+
+A análise espacial do índice de vegetação NDVI em Porto Alegre, realizada através da comparação entre os métodos de krigagem e os modelos autorregressivos espaciais ICAR e SAR, demonstrou resultados promissores na caracterização da distribuição da vegetação urbana. Os três modelos apresentaram bom desempenho na interpolação espacial dos dados, conseguindo capturar adequadamente os padrões de variabilidade da cobertura vegetal na região estudada.
+
+Os resultados obtidos através da krigagem ordinária permitiram uma visualização da distribuição espacial do NDVI, enquanto os modelos ICAR e SAR incorporaram explicitamente a estrutura de dependência espacial dos dados, trazendo informações adicionais sobre os padrões de autocorrelação presentes na vegetação urbana.
+
+No entanto, é importante reconhecer algumas limitações metodológicas do presente estudo. A principal delas refere-se à utilização de dados de apenas um único dia, o que não permite capturar a variabilidade temporal da vegetação urbana, incluindo possíveis alterações sazonais ou mudanças ao longo do tempo. Estudos futuros poderiam se beneficiar da incorporação de séries temporais mais extensas, possibilitando uma análise mais abrangente da dinâmica da vegetação urbana.
+
+Além disso, recomenda-se para trabalhos futuros:
+
+* A inclusão de múltiplas datas de imageamento para capturar variações sazonais;
+
+* A incorporação de variáveis ambientais adicionais que possam influenciar o NDVI;
+
+* A validação dos modelos com um conjunto mais amplo de dados;
+
+* A análise da relação entre os padrões espaciais identificados e aspectos socioeconômicos da região.
