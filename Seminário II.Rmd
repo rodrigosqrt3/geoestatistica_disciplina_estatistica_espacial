@@ -1556,13 +1556,14 @@ tabela_kable
 
 Ao comparar os modelos ICAR e SAR com base nas métricas DIC, WAIC e log-verossimilhança, podemos analisar o desempenho relativo de cada modelo.
 
-* DIC: Para o modelo ICAR, o DIC é $544.1125$, enquanto para o modelo SAR é $543.6517$. Valores mais baixos de DIC indicam melhor ajuste do modelo aos dados, com penalização pela complexidade. Neste caso, o modelo SAR apresenta um DIC ligeiramente melhor que o ICAR, sugerindo que o modelo SAR tem uma melhor adequação aos dados, levando em consideração a simplicidade do modelo.
+* DIC: Para o modelo ICAR, o DIC é $`r format(icar_model$model$dic$dic, digits=4)`$, enquanto para o modelo SAR é $`r format(sar_model$model$dic$dic, digits=4)`$. Valores mais baixos de DIC indicam melhor ajuste do modelo aos dados, com penalização pela complexidade. Neste caso, o modelo SAR apresenta um DIC `r ifelse(sar_model$model$dic$dic < icar_model$model$dic$dic, "ligeiramente melhor", "ligeiramente pior")` que o ICAR, sugerindo que o modelo SAR tem uma melhor adequação aos dados, levando em consideração a simplicidade do modelo.
 
-* WAIC: O WAIC do modelo ICAR é $545.2054$ e o do modelo SAR é $545.6971$. O WAIC também é uma métrica que penaliza a complexidade do modelo, sendo que valores mais baixos indicam um melhor modelo. O ICAR tem um valor de WAIC ligeiramente melhor, indicando que o modelo ICAR pode ser um pouco mais eficiente em termos de ajuste aos dados em relação ao SAR.
+* WAIC: O WAIC do modelo ICAR é $`r format(icar_model$model$waic$waic, digits=4)`$ e o do modelo SAR é $`r format(sar_model$model$waic$waic, digits=4)`$. O WAIC também é uma métrica que penaliza a complexidade do modelo, sendo que valores mais baixos indicam um melhor modelo. O `r ifelse(icar_model$model$waic$waic < sar_model$model$waic$waic, "ICAR", "SAR")` tem um valor de WAIC ligeiramente melhor, indicando que o modelo `r ifelse(icar_model$model$waic$waic < sar_model$model$waic$waic, "ICAR", "SAR")` pode ser um pouco mais eficiente em termos de ajuste aos dados em relação ao `r ifelse(icar_model$model$waic$waic < sar_model$model$waic$waic, "SAR", "ICAR")`.
 
-* Log-verossimilhança: A log-verossimilhança do modelo ICAR é $-2157.6876$, enquanto para o SAR é $-2165.3460$. O valor da log-verossimilhança mais próximo de zero é melhor, já que um valor mais negativo indica um ajuste pior. Nesse caso, o modelo ICAR tem uma log-verossimilhança mais alta (menos negativa), o que sugere um melhor ajuste em termos de log-verossimilhança.
+* Log-verossimilhança: A log-verossimilhança do modelo ICAR é $`r format(icar_model$model$mlik[1], digits=4)`$, enquanto para o SAR é $`r format(sar_model$model$mlik[1], digits=4)`$. O valor da log-verossimilhança mais próximo de zero é melhor, já que um valor mais negativo indica um ajuste pior. Nesse caso, o modelo `r ifelse(abs(icar_model$model$mlik[1]) < abs(sar_model$model$mlik[1]), "ICAR", "SAR")` tem uma log-verossimilhança mais alta (menos negativa), o que sugere um melhor ajuste em termos de log-verossimilhança.
 
-Comparando as métricas, os resultados entre os modelos ICAR e SAR são muito semelhantes, com pequenas diferenças nos valores de DIC, WAIC e log-verossimilhança. O modelo ICAR apresenta um desempenho ligeiramente melhor em termos de WAIC e log-verossimilhança. No entanto, as diferenças são pequenas, o que indica que ambos os modelos têm um desempenho muito próximo e são igualmente válidos
+Comparando as métricas, os resultados entre os modelos ICAR e SAR são muito semelhantes, com pequenas diferenças nos valores de DIC, WAIC e log-verossimilhança.
+
 
 ### Mapa
 
